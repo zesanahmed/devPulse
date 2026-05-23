@@ -5,16 +5,14 @@ import { issuesController } from "./issues.controller.js";
 
 const router = Router();
 
-// Any logged in user
+// Public
+router.get("/", issuesController.getAllIssues);
+
+// Logged in users only
 router.post(
   "/",
   auth(USER_ROLE.contributor, USER_ROLE.maintainer),
   issuesController.createIssue,
-);
-router.get(
-  "/",
-  auth(USER_ROLE.contributor, USER_ROLE.maintainer),
-  issuesController.getAllIssues,
 );
 router.get(
   "/:id",

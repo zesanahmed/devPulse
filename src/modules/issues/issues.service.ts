@@ -14,36 +14,63 @@ const createIssue = async (payload: IIssue, reporterId: number) => {
   return result.rows[0];
 };
 
-const getAllIssues = async (sort?: string) => {
+const getAllIssues = async (sort?: string, type?: string, status?: string) => {
+  // Build dynamic query
+  const conditions: string[] = [];
+  const values: unknown[] = [];
+  let paramCount = 1;
+
+  if (type) {
+    conditions.push(`type = $${paramCount}`);
+    values.push(type);
+    paramCount++;
+  }
+
+  if (status) {
+    conditions.push(`status = $${paramCount}`);
+    values.push(status);
+    paramCount++;
+  }
+
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   const order = sort === "oldest" ? "ASC" : "DESC";
+
   const issuesResult = await pool.query(
-    `SELECT * FROM issues ORDER BY created_at ${order}`,
+    `SELECT * FROM issues ${whereClause} ORDER BY created_at ${order}`,
+    values,
   );
 
   const issues = issuesResult.rows;
-
   if (issues.length === 0) return [];
 
-  // Get all unique reporter IDs
+  // Get unique reporter IDs
   const reporterIds = [
     ...new Set(issues.map((issue) => issue.reporter_id as number)),
   ];
 
-  // Fetch reporter info without JOIN
+  // Fetch reporters in one query
   const usersResult = await pool.query(
-    `SELECT id, name, email, role FROM users WHERE id = ANY($1)`,
+    `SELECT id, name, role FROM users WHERE id = ANY($1)`,
     [reporterIds],
   );
 
+  // Map reporters
   const usersMap = new Map<number, object>();
   for (const user of usersResult.rows) {
     usersMap.set(user.id as number, user);
   }
 
-  // Attach reporter info to each issue
+  // Attach reporter to each issue
   const issuesWithReporter = issues.map((issue) => ({
-    ...issue,
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
     reporter: usersMap.get(issue.reporter_id as number) ?? null,
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
   }));
 
   return issuesWithReporter;
