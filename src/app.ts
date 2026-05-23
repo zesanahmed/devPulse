@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: "DevPulse API is running 🚀",
+    message: "DevPulse API is running",
   });
 });
 
