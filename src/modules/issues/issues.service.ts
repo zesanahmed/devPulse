@@ -1,5 +1,9 @@
 import { pool } from "../../config/db.js";
-import type { IIssue, IUpdateStatus } from "./issues.interface.js";
+import type {
+  IIssue,
+  IUpdateIssue,
+  IUpdateStatus,
+} from "./issues.interface.js";
 
 const createIssue = async (payload: IIssue, reporterId: number) => {
   const { title, description, type } = payload;
@@ -117,6 +121,50 @@ const updateIssueStatus = async (id: string, payload: IUpdateStatus) => {
   return result.rows[0];
 };
 
+const updateIssue = async (
+  id: string,
+  payload: IUpdateIssue,
+  userId: number,
+  userRole: string,
+) => {
+  // First check if issue exists
+  const issueResult = await pool.query(`SELECT * FROM issues WHERE id = $1`, [
+    id,
+  ]);
+
+  if ((issueResult.rowCount ?? 0) === 0) {
+    throw new Error("Issue not found");
+  }
+
+  const issue = issueResult.rows[0];
+
+  // Permission check
+  if (userRole === "contributor") {
+    if (issue.reporter_id !== userId) {
+      throw new Error("Forbidden: You can only update your own issues");
+    }
+    if (issue.status !== "open") {
+      throw new Error("Forbidden: You can only update issues with open status");
+    }
+  }
+
+  const { title, description, type } = payload;
+
+  const result = await pool.query(
+    `UPDATE issues
+     SET
+       title = COALESCE($1, title),
+       description = COALESCE($2, description),
+       type = COALESCE($3, type),
+       updated_at = NOW()
+     WHERE id = $4
+     RETURNING *`,
+    [title, description, type, id],
+  );
+
+  return result.rows[0];
+};
+
 const deleteIssue = async (id: string) => {
   const result = await pool.query(
     `DELETE FROM issues WHERE id = $1 RETURNING *`,
@@ -135,5 +183,6 @@ export const issuesService = {
   getAllIssues,
   getIssueById,
   updateIssueStatus,
+  updateIssue,
   deleteIssue,
 };

@@ -96,6 +96,43 @@ const updateIssueStatus = async (
   }
 };
 
+const updateIssue = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+
+    const result = await issuesService.updateIssue(
+      id as string,
+      req.body,
+      userId,
+      userRole,
+    );
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue updated successfully",
+      data: result,
+    });
+  } catch (error: unknown) {
+    const err = error as Error;
+
+    const statusCode = err.message.startsWith("Forbidden")
+      ? 403
+      : err.message === "Issue not found"
+        ? 404
+        : 400;
+
+    sendResponse(res, {
+      statusCode,
+      success: false,
+      message: err.message,
+      errors: err,
+    });
+  }
+};
+
 const deleteIssue = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -105,7 +142,6 @@ const deleteIssue = async (req: Request, res: Response): Promise<void> => {
       statusCode: 200,
       success: true,
       message: "Issue deleted successfully",
-      data: null,
     });
   } catch (error: unknown) {
     const err = error as Error;
@@ -117,11 +153,11 @@ const deleteIssue = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
-
 export const issuesController = {
   createIssue,
   getAllIssues,
   getIssueById,
   updateIssueStatus,
+  updateIssue,
   deleteIssue,
 };
