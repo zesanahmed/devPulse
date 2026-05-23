@@ -5,6 +5,7 @@ import express, {
   type Response,
 } from "express";
 import globalErrorHandler from "./middleware/globalErrorHandler.js";
+import { authRoute } from "./modules/auth/auth.route.js";
 
 const app: Application = express();
 
@@ -15,9 +16,12 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: "DevPulse API is running",
+    message: "DevPulse API is running 🚀",
   });
 });
+
+// Routes
+app.use("/api/auth", authRoute);
 
 // Global Error Handling Middleware
 app.use(globalErrorHandler);
