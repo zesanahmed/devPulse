@@ -26,13 +26,17 @@ const createIssue = async (req: Request, res: Response): Promise<void> => {
 
 const getAllIssues = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { sort } = req.query;
-    const result = await issuesService.getAllIssues(sort as string);
+    const { sort, type, status } = req.query;
+    const result = await issuesService.getAllIssues(
+      sort as string | undefined,
+      type as string | undefined,
+      status as string | undefined,
+    );
 
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "Issues retrieved successfully",
+      message: "Issues retrived successfully",
       data: result,
     });
   } catch (error: unknown) {

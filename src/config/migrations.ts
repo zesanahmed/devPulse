@@ -28,10 +28,10 @@ const createTables = async (): Promise<void> => {
 
   try {
     await pool.query(createUsersTable);
-    console.log("Users table ready");
+    // console.log("Users table ready");
 
     await pool.query(createIssuesTable);
-    console.log("Issues table ready");
+    // console.log("Issues table ready");
   } catch (error) {
     console.error("Migration failed:", error);
     throw error;

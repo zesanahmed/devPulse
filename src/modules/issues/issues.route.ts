@@ -16,18 +16,18 @@ router.post(
   issuesController.createIssue,
 );
 
+// Maintainer only )
+router.patch(
+  "/:id/status",
+  auth(USER_ROLE.maintainer),
+  issuesController.updateIssueStatus,
+);
+
 // Contributor (own + open) OR Maintainer (any)
 router.patch(
   "/:id",
   auth(USER_ROLE.contributor, USER_ROLE.maintainer),
   issuesController.updateIssue,
-);
-
-// Maintainer only
-router.patch(
-  "/:id/status",
-  auth(USER_ROLE.maintainer),
-  issuesController.updateIssueStatus,
 );
 router.delete("/:id", auth(USER_ROLE.maintainer), issuesController.deleteIssue);
 
