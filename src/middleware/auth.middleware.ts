@@ -10,18 +10,7 @@ const auth = (...roles: TUserRole[]) => {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const authHeader = req.headers["authorization"];
-
-      if (!authHeader?.startsWith("Bearer ")) {
-        sendResponse(res, {
-          statusCode: 401,
-          success: false,
-          message: "Unauthorized: No token provided",
-        });
-        return;
-      }
-
-      const token = authHeader.split(" ")[1];
+      const token = req.headers["authorization"];
 
       if (!token) {
         sendResponse(res, {

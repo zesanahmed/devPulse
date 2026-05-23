@@ -5,19 +5,15 @@ import { issuesController } from "./issues.controller.js";
 
 const router = Router();
 
-// Public
+// Public routes
 router.get("/", issuesController.getAllIssues);
+router.get("/:id", issuesController.getIssueById);
 
-// Logged in users only
+// Authenticated users only
 router.post(
   "/",
   auth(USER_ROLE.contributor, USER_ROLE.maintainer),
   issuesController.createIssue,
-);
-router.get(
-  "/:id",
-  auth(USER_ROLE.contributor, USER_ROLE.maintainer),
-  issuesController.getIssueById,
 );
 
 // Maintainer only
