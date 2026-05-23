@@ -26,7 +26,8 @@ const createIssue = async (req: Request, res: Response): Promise<void> => {
 
 const getAllIssues = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await issuesService.getAllIssues();
+    const { sort } = req.query;
+    const result = await issuesService.getAllIssues(sort as string);
 
     sendResponse(res, {
       statusCode: 200,

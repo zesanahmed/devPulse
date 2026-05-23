@@ -14,9 +14,10 @@ const createIssue = async (payload: IIssue, reporterId: number) => {
   return result.rows[0];
 };
 
-const getAllIssues = async () => {
+const getAllIssues = async (sort?: string) => {
+  const order = sort === "oldest" ? "ASC" : "DESC";
   const issuesResult = await pool.query(
-    `SELECT * FROM issues ORDER BY created_at DESC`,
+    `SELECT * FROM issues ORDER BY created_at ${order}`,
   );
 
   const issues = issuesResult.rows;
