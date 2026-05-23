@@ -3,7 +3,7 @@ export const USER_ROLE = {
   maintainer: "maintainer",
 } as const;
 
-export type TUserRole = keyof typeof USER_ROLE;
+export type TUserRole = (typeof USER_ROLE)[keyof typeof USER_ROLE];
 
 export interface JwtPayload {
   id: number;
